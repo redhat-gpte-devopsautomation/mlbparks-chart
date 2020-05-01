@@ -1,0 +1,4 @@
+description: Application template for MLB Parks application on EAP 7 & MongoDB built
+  using STI
+name: mlbparks-eap
+version: v0.0.1

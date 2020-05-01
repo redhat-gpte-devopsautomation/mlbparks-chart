@@ -1,0 +1,14 @@
+application_hostname: '' # TODO: must define a default value for .application_hostname'
+application_name: mlbparks
+generic_trigger_secret: 48fh28nf # TODO: must define a default value for .generic_trigger_secret'
+git_ref: master
+git_uri: https://github.com/redhat-gpte-devopsautomation/openshift4mlbparks.git
+github_trigger_secret: 7glx62bd # TODO: must define a default value for .github_trigger_secret'
+maven_mirror_url: '' # TODO: must define a default value for .maven_mirror_url'
+mongodb_admin_password: hgnm49gd # TODO: must define a default value for .mongodb_admin_password'
+mongodb_database: root
+mongodb_noprealloc: '' # TODO: must define a default value for .mongodb_noprealloc'
+mongodb_password: 865hgb21 # TODO: must define a default value for .mongodb_password'
+mongodb_quiet: '' # TODO: must define a default value for .mongodb_quiet'
+mongodb_smallfiles: '' # TODO: must define a default value for .mongodb_smallfiles'
+mongodb_user: mongodb # TODO: must define a default value for .mongodb_user'

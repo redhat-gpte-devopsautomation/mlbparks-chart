@@ -1,0 +1,36 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    application: mlbparks
+    createdBy: template-mlbparks-eap
+  name: {{ .Values.application_name }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: {{ .Values.application_name }}:latest
+  source:
+    git:
+      ref: {{ .Values.git_ref }}
+      uri: {{ .Values.git_uri }}
+    type: Git
+  strategy:
+    sourceStrategy:
+      env:
+      - name: MAVEN_MIRROR_URL
+        value: {{ .Values.maven_mirror_url }}
+      from:
+        kind: ImageStreamTag
+        name: jboss-eap71-openshift:1.4
+        namespace: openshift
+    type: Source
+  triggers:
+  - generic:
+      secret: {{ .Values.generic_trigger_secret }}
+    type: Generic
+  - github:
+      secret: {{ .Values.github_trigger_secret }}
+    type: GitHub
+  - imageChange: {}
+    type: ImageChange

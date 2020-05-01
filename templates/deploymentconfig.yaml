@@ -1,0 +1,138 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    application: mlbparks
+    createdBy: template-mlbparks-eap
+  name: {{ .Values.application_name }}-mongodb
+spec:
+  replicas: 1
+  selector:
+    deploymentConfig: {{ .Values.application_name }}-mongodb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        deploymentConfig: {{ .Values.application_name }}-mongodb
+      name: {{ .Values.application_name }}-mongodb
+    spec:
+      containers:
+      - env:
+        - name: MONGODB_USER
+          value: {{ .Values.mongodb_user }}
+        - name: MONGODB_PASSWORD
+          value: {{ .Values.mongodb_password }}
+        - name: MONGODB_DATABASE
+          value: {{ .Values.mongodb_database }}
+        - name: MONGODB_ADMIN_PASSWORD
+          value: {{ .Values.mongodb_admin_password }}
+        - name: MONGODB_NOPREALLOC
+          value: {{ .Values.mongodb_noprealloc }}
+        - name: MONGODB_SMALLFILES
+          value: {{ .Values.mongodb_smallfiles }}
+        - name: MONGODB_QUIET
+          value: {{ .Values.mongodb_quiet }}
+        image: mongodb
+        imagePullPolicy: IfNotPresent
+        name: {{ .Values.application_name }}-mongodb
+        ports:
+        - containerPort: 27017
+          protocol: TCP
+        resources: {}
+        securityContext:
+          capabilities: {}
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+        volumeMounts:
+        - mountPath: /var/lib/mongodb/data
+          name: {{ .Values.application_name }}-mongodb-data
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      volumes:
+      - emptyDir: {}
+        name: {{ .Values.application_name }}-mongodb-data
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - {{ .Values.application_name }}-mongodb
+      from:
+        kind: ImageStreamTag
+        name: mongodb:3.6
+        namespace: openshift
+    type: ImageChange
+  - type: ConfigChange
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    application: mlbparks
+    createdBy: template-mlbparks-eap
+    deploymentConfig: {{ .Values.application_name }}
+  name: {{ .Values.application_name }}
+spec:
+  replicas: 1
+  selector:
+    deploymentConfig: {{ .Values.application_name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        deploymentConfig: {{ .Values.application_name }}
+    spec:
+      containers:
+      - env:
+        - name: OPENSHIFT_DNS_PING_SERVICE_NAME
+          value: {{ .Values.application_name }}-ping
+        - name: OPENSHIFT_DNS_PING_SERVICE_PORT
+          value: "8888"
+        - name: MONGODB_USER
+          value: {{ .Values.mongodb_user }}
+        - name: MONGODB_PASSWORD
+          value: {{ .Values.mongodb_password }}
+        - name: MONGODB_DATABASE
+          value: {{ .Values.mongodb_database }}
+        - name: MONGODB_ADMIN_PASSWORD
+          value: {{ .Values.mongodb_admin_password }}
+        image: {{ .Values.application_name }}
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          timeoutSeconds: 3
+        name: {{ .Values.application_name }}
+        ports:
+        - containerPort: 8080
+          name: {{ .Values.application_name }}-http
+          protocol: TCP
+        - containerPort: 8888
+          name: {{ .Values.application_name }}-ping
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          timeoutSeconds: 3
+        resources: {}
+        securityContext:
+          capabilities: {}
+          privileged: false
+        terminationMessagePath: /dev/termination-log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+  triggers:
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - {{ .Values.application_name }}
+      from:
+        kind: ImageStreamTag
+        name: {{ .Values.application_name }}:latest
+    type: ImageChange
+  - type: ConfigChange
